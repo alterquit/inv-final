@@ -25,11 +25,11 @@ def show_login(app):
 
     login_button = tk.Button(app.login_frame, text="Login", font=("Helvetica", 10, "bold"),
                              command=lambda: validate_user(app, username_entry.get(), password_entry.get()))
-    login_button.pack(pady=10)
+    login_button.pack(pady=30, padx=0)
 
     register_button = tk.Button(app.login_frame, text="Register", font=("Helvetica", 10, "bold"),
                                 command=lambda: show_register(app))
-    register_button.pack(pady=5)
+    register_button.pack(pady=5, padx=0)
 
 
 def show_register(app):
