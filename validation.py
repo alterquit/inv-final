@@ -1,75 +1,97 @@
 import tkinter as tk
 from tkinter import messagebox
 
+def on_enter(e):
+    e.widget.config(bg="#3A9AD9")
+
+def on_leave(e):
+    e.widget.config(bg="SystemButtonFace")
+
+def center_widgets(frame):
+    frame.columnconfigure(0, weight=1)
+    frame.rowconfigure(0, weight=1)
 
 def show_login(app):
-    app.login_frame = tk.Frame(app)
+    app.login_frame = tk.Frame(app, bg="lightblue")
     app.login_frame.pack(side="top", fill="both", expand=True)
 
-    app.login_frame.configure(bg="#F0F0F0")
+    center_widgets(app.login_frame)
 
-    title = tk.Label(app.login_frame, text="Inventory Management System", font=("Helvetica", 20, "bold"), bg="#F0F0F0")
+    content_frame = tk.Frame(app.login_frame, bg="lightblue")
+    content_frame.grid(row=0, column=0)
+
+    title = tk.Label(content_frame, text="Inventory Management System", font=("Helvetica", 20, "bold"), bg="lightblue")
     title.pack(pady=20)
 
-    username_label = tk.Label(app.login_frame, text="Username:", font=("Helvetica", 12, "bold"), bg="#F0F0F0")
+    username_label = tk.Label(content_frame, text="Username:", font=("Helvetica", 12, "bold"), bg="lightblue")
     username_label.pack()
 
-    username_entry = tk.Entry(app.login_frame)
+    username_entry = tk.Entry(content_frame)
     username_entry.pack(pady=5)
 
-    password_label = tk.Label(app.login_frame, text="Password:", font=("Helvetica", 12, "bold"), bg="#F0F0F0")
+    password_label = tk.Label(content_frame, text="Password:", font=("Helvetica", 12, "bold"), bg="lightblue")
     password_label.pack()
 
-    password_entry = tk.Entry(app.login_frame, show="*")
+    password_entry = tk.Entry(content_frame, show="*")
     password_entry.pack(pady=5)
 
-    login_button = tk.Button(app.login_frame, text="Login", font=("Helvetica", 10, "bold"),
+    login_button = tk.Button(content_frame, text="Login", font=("Helvetica", 10, "bold"),
                              command=lambda: validate_user(app, username_entry.get(), password_entry.get()))
     login_button.pack(pady=30, padx=0)
+    login_button.bind("<Enter>", on_enter)
+    login_button.bind("<Leave>", on_leave)
 
-    register_button = tk.Button(app.login_frame, text="Register", font=("Helvetica", 10, "bold"),
+    register_button = tk.Button(content_frame, text="Register", font=("Helvetica", 10, "bold"),
                                 command=lambda: show_register(app))
     register_button.pack(pady=5, padx=0)
-
+    register_button.bind("<Enter>", on_enter)
+    register_button.bind("<Leave>", on_leave)
 
 def show_register(app):
     app.login_frame.destroy()
 
-    app.register_frame = tk.Frame(app)
+    app.register_frame = tk.Frame(app, bg="lightblue")
     app.register_frame.pack(side="top", fill="both", expand=True)
 
-    app.register_frame.configure(bg="#F0F0F0")
+    center_widgets(app.register_frame)
 
-    title = tk.Label(app.register_frame, text="Register", font=("Helvetica", 20, "bold"), bg="#F0F0F0")
+    content_frame = tk.Frame(app.register_frame, bg="lightblue")
+    content_frame.grid(row=0, column=0)
+
+    title = tk.Label(content_frame, text="Register", font=("Helvetica", 20, "bold"), bg="lightblue")
     title.pack(pady=20)
 
-    username_label = tk.Label(app.register_frame, text="Username:", font=("Helvetica", 12, "bold"), bg="#F0F0F0")
+    username_label = tk.Label(content_frame, text="Username:", font=("Helvetica", 12, "bold"), bg="lightblue")
     username_label.pack()
 
-    username_entry = tk.Entry(app.register_frame)
+    username_entry = tk.Entry(content_frame)
     username_entry.pack(pady=5)
 
-    password_label = tk.Label(app.register_frame, text="Password:", font=("Helvetica", 12, "bold"), bg="#F0F0F0")
+    password_label = tk.Label(content_frame, text="Password:", font=("Helvetica", 12, "bold"), bg="lightblue")
     password_label.pack()
 
-    password_entry = tk.Entry(app.register_frame, show="*")
+    password_entry = tk.Entry(content_frame, show="*")
     password_entry.pack(pady=5)
 
-    confirm_password_label = tk.Label(app.register_frame, text="Confirm Password:", font=("Helvetica", 12, "bold"),
-                                      bg="#F0F0F0")
+    confirm_password_label = tk.Label(content_frame, text="Confirm Password:", font=("Helvetica", 12, "bold"),
+                                      bg="lightblue")
     confirm_password_label.pack()
 
-    confirm_password_entry = tk.Entry(app.register_frame, show="*")
+    confirm_password_entry = tk.Entry(content_frame, show="*")
     confirm_password_entry.pack(pady=5)
 
-    register_button = tk.Button(app.register_frame, text="Register", font=("Helvetica", 10, "bold"),
+    register_button = tk.Button(content_frame, text="Register", font=("Helvetica", 10, "bold"),
                                 command=lambda: register_user(app, username_entry.get(), password_entry.get(),
                                                               confirm_password_entry.get()))
     register_button.pack(pady=10)
+    register_button.bind("<Enter>", on_enter)
+    register_button.bind("<Leave>", on_leave)
 
-    back_button = tk.Button(app.register_frame, text="Back to Login", font=("Helvetica", 10, "bold"),
+    back_button = tk.Button(content_frame, text="Back to Login", font=("Helvetica", 10, "bold"),
                             command=lambda: back_to_login(app))
     back_button.pack(pady=5)
+    back_button.bind("<Enter>", on_enter)
+    back_button.bind("<Leave>", on_leave)
 
 
 def back_to_login(app):
@@ -96,20 +118,6 @@ def register_user(app, username, password, confirm_password):
         return
 
     cursor = app.conn.cursor()
-    cursor.execute("INSERT INTO user (username, password, user_type) VALUES (?, ?, ?)", (username, password, "user"))
-    app.conn.commit()
-
-    messagebox.showinfo("Success", "User registered successfully")
-    app.register_frame.grid_forget()
-    show_login(app)
-
-
-def register_user(app, username, password, confirm_password):
-    if password != confirm_password:
-        messagebox.showerror("Error", "Passwords do not match")
-        return
-
-    cursor = app.conn.cursor()
 
     # Check if the username already exists
     cursor.execute("SELECT * FROM user WHERE username = ?", (username,))
@@ -124,3 +132,4 @@ def register_user(app, username, password, confirm_password):
     messagebox.showinfo("Success", "User registered successfully")
     app.register_frame.destroy()
     show_login(app)
+
