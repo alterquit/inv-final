@@ -3,11 +3,36 @@ from tkinter import ttk
 from datetime import datetime, timedelta
 import sqlite3
 
-
 class Overview(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, bg="#dfe3ee")
+    def __init__(self, parent, controller, username):
+        tk.Frame.__init__(self, parent)
         self.controller = controller
+
+        welcome_label = tk.Label(self, text=f"Welcome to Inventory Management System!", font=("Arial", 18))
+        welcome_label.pack(pady=10)
+
+        stats_label = tk.Label(self, text="You can use the navigation buttons on the left bottom side to access different functions.", font=("Arial", 12))
+        stats_label.pack(pady=10)
+
+        # Separator
+        separator1 = ttk.Separator(self, orient='horizontal')
+        separator1.pack(fill='x', pady=5)
+
+        user_guide_label = tk.Label(self, text="User Guide", font=("Arial", 10, "bold"))
+        user_guide_label.pack(pady=10)
+
+        guide_text = """You can add, delete, and modify goods in "Search & Configuration"
+
+You can add, delete, and modify users in "User Management"
+
+You can export stats graph and export CSV in "Stats & Reports"
+"""
+        guide_label = tk.Label(self, text=guide_text, font=("Arial", 10), justify=tk.LEFT)
+        guide_label.pack(pady=10)
+
+        # Separator
+        separator2 = ttk.Separator(self, orient='horizontal')
+        separator2.pack(fill='x', pady=5)
 
         self.create_widgets()
 
@@ -72,4 +97,14 @@ class Overview(tk.Frame):
         columns = ("product_id", "product_name", "product_category", "product_price", "stocks")
         product_table = ttk.Treeview(table_frame, columns=columns, show="headings")
 
+        # Configure the table headings
+        for col in columns:
+            product_table.heading(col, text=col)
+
+        # Insert the product data
+        for row in product_data:
+            product_table.insert('', 'end', values=row)
+
+        # Pack the table
+        product_table.pack(fill="both", expand=True)
 
