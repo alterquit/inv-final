@@ -10,7 +10,7 @@ from validation import show_login
 
 class MainApp(tk.Tk):
     def __init__(self):
-        tk.Tk.__init__(self, *args, **kwargs)
+        tk.Tk.__init__(self)
         #Layout
         self.geometry("600x350")
         self.title("Inventory management system")
