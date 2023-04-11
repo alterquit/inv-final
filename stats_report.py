@@ -6,7 +6,9 @@ class StatsReport(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
+        self.controller = controller
         self.create_widgets()
+        self.current_chart = None
 
     def create_widgets(self):
         title = tk.Label(self, text="Stats & Reports", font=("Helvetica", 18))
@@ -19,10 +21,12 @@ class StatsReport(tk.Frame):
         supplier_button.pack(pady=10)
 
     def generate_sales_report(self):
-        self.show_graph("Sales Report", self.get_sales_data())
+        data = self.get_sales_data()
+        self.show_graph("Sales Report", data)
 
     def generate_supplier_report(self):
-        self.show_graph("Supplier Report", self.get_supplier_data())
+        data = self.get_supplier_data()
+        self.show_graph("Supplier Report", data)
 
     def get_sales_data(self):
         # Replace with your actual data retrieval method
@@ -43,6 +47,9 @@ class StatsReport(tk.Frame):
         return sample_supplier_data
 
     def show_graph(self, title, data):
+        if self.current_chart is not None:
+            self.current_chart.get_tk_widget().pack_forget()  # Remove the old chart from the window
+
         figure = Figure(figsize=(6, 5), dpi=100)
         plot = figure.add_subplot(1, 1, 1)
 
@@ -56,4 +63,6 @@ class StatsReport(tk.Frame):
 
         canvas = FigureCanvasTkAgg(figure, self)
         canvas.get_tk_widget().pack()
+
+        self.current_chart = canvas  # Store the new chart for future removal
 
