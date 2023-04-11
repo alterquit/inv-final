@@ -14,7 +14,7 @@ class MainApp(tk.Tk):
         tk.Tk.__init__(self)
         self.username = ''
         # Layout
-        self.geometry("1050x900")
+        self.geometry("1030x800")
         self.title("Inventory management system")
         # Connect to the database
         self.conn = sqlite3.connect("inventory_management.db")
