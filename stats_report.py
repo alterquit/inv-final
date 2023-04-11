@@ -31,7 +31,8 @@ class StatsReport(tk.Frame):
         self.show_graph("Supplier Report", data)
 
     def get_sales_data(self):
-        # Replace with your actual data retrieval method
+        '''The ability to generate charts requires data to be stored in the database before it can be developed. 
+        This is just a demo to show how the chart looks.'''
         sample_sales_data = {
             "Product A": 150,
             "Product B": 200,
@@ -40,7 +41,8 @@ class StatsReport(tk.Frame):
         return sample_sales_data
 
     def get_supplier_data(self):
-        # Replace with your actual data retrieval method
+        '''The ability to generate charts requires data to be stored in the database before it can be developed. 
+        This is just a demo to show how the chart looks.'''
         sample_supplier_data = {
             "Supplier A": 100,
             "Supplier B": 250,
@@ -79,6 +81,7 @@ class StatsReport(tk.Frame):
         if filename:
             canvas.figure.savefig(filename)
             tk.messagebox.showinfo("Export Successful", "Chart has been exported successfully.")
+
 
 
 
