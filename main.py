@@ -1,6 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
 from overview import Overview
 from search_configuration import SearchConfiguration
 from user_management import UserManagement
@@ -27,6 +25,8 @@ class MainApp(tk.Tk):
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
 
+        self.create_navigation_buttons(self.container)  # Move this line here
+
         self.content_frame = tk.Frame(self.container)
         self.content_frame.pack(side="top", fill="both", expand=True)
 
@@ -38,8 +38,6 @@ class MainApp(tk.Tk):
                 frame = F(self.content_frame, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
-
-        self.create_navigation_buttons(self.container)  # Move this line here
 
         self.show_frame(Overview)
 
