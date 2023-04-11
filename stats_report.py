@@ -1,68 +1,152 @@
 import tkinter as tk
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from tkinter import ttk
+import sqlite3
 
-class StatsReport(tk.Frame):
+class SearchConfiguration(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
-        self.controller = controller
+        # Use the ttk themes for better appearance
+        self.style = ttk.Style()
+        self.style.theme_use('clam')
+
+        # Customize the appearance of the widgets
+        self.style.configure('TLabel', background='#d0e1f9', foreground='black', font=("Helvetica", 12))  # Update the background color here
+        self.style.configure('Title.TLabel', font=("Helvetica", 18, 'bold'))
+        self.style.configure('TButton', font=("Helvetica", 12, 'bold'))
+        self.style.configure('TEntry', font=("Helvetica", 12))
+
+        self.configure(bg='#f0f0f0')
+
+        self.connect_to_database()
         self.create_widgets()
-        self.current_chart = None
+    # Connect to the database
+    def connect_to_database(self):
+        self.conn = sqlite3.connect('inventory_management.db')
+        self.cursor = self.conn.cursor()
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                details TEXT
+            )
+        ''')
+        self.conn.commit()
 
+    # Layout
     def create_widgets(self):
-        title = tk.Label(self, text="Stats & Reports", font=("Helvetica", 18))
-        title.pack(pady=10)
+        title = tk.Label(self, text="Search & Configuration", font=("Helvetica", 18))
+        title.pack(pady=20)
 
-        sales_button = tk.Button(self, text="Generate Sales Report", command=self.generate_sales_report)
-        sales_button.pack(pady=10)
+        search_label = tk.Label(self, text="Search by keyword:")
+        search_label.pack(pady=(0, 5))
+        self.search_entry = tk.Entry(self)
+        self.search_entry.pack(pady=(0, 10))
 
-        supplier_button = tk.Button(self, text="Generate Supplier Report", command=self.generate_supplier_report)
-        supplier_button.pack(pady=10)
+        search_button = tk.Button(self, text="Search", command=self.search_product)
+        search_button.pack(pady=10)
 
-    def generate_sales_report(self):
-        data = self.get_sales_data()
-        self.show_graph("Sales Report", data)
+        self.result_label = tk.Label(self, text="Results:")
+        self.result_label.pack(pady=(10, 0))
 
-    def generate_supplier_report(self):
-        data = self.get_supplier_data()
-        self.show_graph("Supplier Report", data)
+        result_frame = tk.Frame(self)
+        result_frame.pack(pady=10)
 
-    def get_sales_data(self):
-        # Replace with your actual data retrieval method
-        sample_sales_data = {
-            "Product A": 150,
-            "Product B": 200,
-            "Product C": 300
-        }
-        return sample_sales_data
+        self.result_listbox = tk.Listbox(result_frame, width=40, height=10)
+        self.result_listbox.pack(side="left", fill="y")
 
-    def get_supplier_data(self):
-        # Replace with your actual data retrieval method
-        sample_supplier_data = {
-            "Supplier A": 100,
-            "Supplier B": 250,
-            "Supplier C": 400
-        }
-        return sample_supplier_data
+        scrollbar = ttk.Scrollbar(result_frame, orient="vertical", command=self.result_listbox.yview)
+        scrollbar.pack(side="right", fill="y")
 
-    def show_graph(self, title, data):
-        if self.current_chart is not None:
-            self.current_chart.get_tk_widget().pack_forget()  # Remove the old chart from the window
+        self.result_listbox.config(yscrollcommand=scrollbar.set)
 
-        figure = Figure(figsize=(6, 5), dpi=100)
-        plot = figure.add_subplot(1, 1, 1)
+        add_product_label = tk.Label(self, text="Add Product:")
+        add_product_label.pack(pady=(10, 5))
+        self.add_product_entry = tk.Entry(self)
+        self.add_product_entry.pack(pady=(0, 10))
 
-        x = list(data.keys())
-        y = list(data.values())
-        plot.bar(x, y)
+        add_button = tk.Button(self, text="Add", command=self.add_product)
+        add_button.pack(pady=10)
 
-        plot.set_title(title)
-        plot.set_xlabel("Categories")
-        plot.set_ylabel("Values")
+        update_product_old_label = tk.Label(self, text="Old Product Name:")
+        update_product_old_label.pack()
+        self.update_product_old_entry = tk.Entry(self)
+        self.update_product_old_entry.pack()
 
-        canvas = FigureCanvasTkAgg(figure, self)
-        canvas.get_tk_widget().pack()
+        update_product_new_label = tk.Label(self, text="New Product Name:")
+        update_product_new_label.pack()
+        self.update_product_new_entry = tk.Entry(self)
+        self.update_product_new_entry.pack()
 
-        self.current_chart = canvas  # Store the new chart for future removal
+        update_button = tk.Button(self, text="Update", command=self.update_product)
+        update_button.pack(pady=10)
+
+        delete_product_label = tk.Label(self, text="Delete Product:")
+        delete_product_label.pack(pady=(10, 5))
+        self.delete_product_entry = tk.Entry(self)
+        self.delete_product_entry.pack(pady=(0, 10))
+
+        delete_button = tk.Button(self, text="Delete", command=self.delete_product)
+        delete_button.pack(pady=10)
+
+
+    # Search function
+    def search_product(self):
+        keyword = self.search_entry.get()
+        self.cursor.execute("SELECT name FROM products WHERE name LIKE ?", ('%' + keyword + '%',))
+        results = self.cursor.fetchall()
+
+        self.result_listbox.delete(0, 'end')
+        for result in results:
+            self.result_listbox.insert('end', result[0])
+
+        self.result_label['text'] = f'Results ({len(results)}):'
+
+    # Add function
+    def add_product(self):
+        product_name = self.add_product_entry.get()
+        self.cursor.execute("SELECT name FROM products WHERE name = ?", (product_name,))
+        existing_product = self.cursor.fetchone()
+
+        if not existing_product:
+            self.cursor.execute("INSERT INTO products (name, details) VALUES (?, ?)", (product_name, 'Sample Details'))
+            self.conn.commit()
+            self.add_product_entry.delete(0, 'end')
+            self.result_label['text'] = f"Added {product_name}"
+        else:
+            self.result_label['text'] = f"{product_name} already exists"
+
+    # Update function
+    def update_product(self):
+        old_name = self.update_product_old_entry.get()
+        new_name = self.update_product_new_entry.get()
+        self.cursor.execute("SELECT id FROM products WHERE name = ?", (old_name,))
+        existing_product = self.cursor.fetchone()
+
+        if existing_product:
+            self.cursor.execute("UPDATE products SET name = ? WHERE name = ?", (new_name, old_name))
+            self.conn.commit()
+            self.update_product_old_entry.delete(0, 'end')
+            self.update_product_new_entry.delete(0, 'end')
+            self.result_label['text'] = f"Updated {old_name} to {new_name}"
+        else:
+            self.result_label['text'] = f"{old_name} not found"
+
+    # Delete function
+    def delete_product(self):
+        product_name = self.delete_product_entry.get()
+        self.cursor.execute("SELECT id FROM products WHERE name = ?", (product_name,))
+        existing_product = self.cursor.fetchone()
+
+        if existing_product:
+            self.cursor.execute("DELETE FROM products WHERE name = ?", (product_name,))
+            self.conn.commit()
+            self.delete_product_entry.delete(0, 'end')
+            self.result_label['text'] = f"Deleted {product_name}"
+        else:
+            self.result_label['text'] = f"{product_name} not found"
+
+    # close the database connection when the application is closed
+    def __del__(self):
+        self.conn.close()
 
